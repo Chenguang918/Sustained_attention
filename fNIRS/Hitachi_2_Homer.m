@@ -1,25 +1,36 @@
 clear all
 clc
 
-%% Version 3 update: channels and wavelengths are re-ordered such that they
-% are in the order Homer2 software expects.
-% User choice to remove marker at end of stimulus as this is not needed in
-% Homer. Thanks to Ian Wiggins for your assistance with Version 3 edits.
-% Rebecca S Dewey 29th July 2014
-
-%% Revision update: stimulus markers are now read into the "aux" variable
-% Rebecca S Dewey 10th December 2012
+%% Revision based on Hitachi_2_Homer_V3
+% 1.loop across subjects
+% 2.auto choose loc file
+% 3.auto choose event marker
 
 disp('**********************************************************************')
 disp('This script converts raw data output from the Hitachi ETG4000 into the')
 disp('format required by Homer2.  Please use with caution - if you have any ')
 disp('problems / find any errors, PLEASE contact me!!')
-disp('Contact: rebecca.dewey@physics.org')
-disp('Rebecca S Dewey 29/10/2012')
+disp('Contact: chenguang@bnu.edu.cn')
+disp('Chenguang Zhao 02/06/2022')
 disp('**********************************************************************')
 
 % Selects and reads in the data file.
-[filen, pathn] = uigetfile('*.csv','Select the raw probe data file');
+% [filen, pathn] = uigetfile('*.csv','Select the raw probe data file');
+% %original code
+
+Subject = [14:21];
+for iSubject = 1:length(Subject)
+    for iprobe = 1:2
+        try
+clearvars -except iprobe iSubject Subject   
+        
+SubjectNames = {['sub',num2str(Subject(iSubject))]};
+pathn = ['E:\Sustained attention\Baseline\Data\fNIRs\'];
+% data_log =
+% dir([pathn,'sub',num2str(Subject(iSubject)),'_*_MES_Probe',num2str(iprobe),'.csv']);
+data_log = dir([pathn,'sub',num2str(Subject(iSubject)),'_MES_Probe',num2str(iprobe),'.csv']);  % speciefy sub14-21
+filen = data_log.name;
+%%
 path_file_n = [pathn filen];
 if filen(1) == 0 | pathn(1) == 0
     return;
@@ -98,8 +109,10 @@ SD.MeasList = [];
 % Input source / detector configuration using 3D digitiser file
 % This will read the optode configuration "Mode" from the .csv file and follow 
 % the respective arrangement in creating the MeasList array.
-modeinstruct = ['Please choose ', text_array, ' position file'];
-[posfilename,pospath] = uigetfile('*.pos',modeinstruct);
+% modeinstruct = ['Please choose ', text_array, ' position file'];
+% [posfilename,pospath] = uigetfile('*.pos',modeinstruct);
+pospath = 'C:\Users\lgh\Desktop\Code\Sustained_attention\fNIRS\';
+posfilename = '3x5.pos';
 channel_pos = importdata(strcat(pospath,posfilename));
 channel_pos_tmp = char(channel_pos);
 array_options = ['3x3', '3x5', '4x4'];
@@ -365,3 +378,7 @@ s = aux; % change at 2022/6/2
 disp('I have all the information I need... Saving...');
 save(strcat(pathn,filen(1:length(filen)-3),'nirs'),'t', 'd', 'SD', 's', 'ml', 'aux');
 disp('Done!');
+        catch
+        end
+    end
+end
